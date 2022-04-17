@@ -104,8 +104,6 @@ function finishGame() {
 
         // if dealer hit 5 cards, determine who won
 
-        console.log(`Scores: ${user.value}, ${dealer.value}`);
-
         const userScore = user.value;
         const dealerScore = dealer.value;
         if (dealerScore > 21) {
