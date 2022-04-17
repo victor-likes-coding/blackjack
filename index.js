@@ -34,6 +34,19 @@ function createDeck() {
     }
 }
 
+function shuffle(deck) {
+    let cardSwap = deck.length;
+
+    while (cardSwap) {
+        index = Math.floor(Math.random() * cardSwap--);
+
+        // swap last element with chosen index
+        tempCard = deck[cardSwap];
+        deck[cardSwap] = deck[index];
+        deck[index] = tempCard;
+    }
+}
+
 function getCardValue({ card }) {
     /*
      * Card is an object, values 1 - 9 are numbers, AJQK are strings
