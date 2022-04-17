@@ -34,6 +34,21 @@ function createDeck() {
     }
 }
 
+function getCardValue({ card }) {
+    /*
+     * Card is an object, values 1 - 9 are numbers, AJQK are strings
+     * {
+     *  card: A, 1, ... J, Q, K
+     * }
+     */
+
+    if (typeof card === "number") {
+        return card;
+    }
+
+    // if A => Ace => 10 like other strings
+    return 10;
+}
 function setUp() {
     createSuites();
     createDeck();
