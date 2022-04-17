@@ -9,7 +9,13 @@
     </head>
     <body>
         <h1>Black Jack</h1>
-        <button></button>
+        <button onclick="start()">Start Game</button>
+
+        <p id="player-score"></p>
+        <p id="dealer-score"></p>
+        <button id="hit" onclick="hit()" class="hidden">Hit</button>
+        <button id="stay" onclick="stay()" class="hidden">Stay</button>
+        <p id="winner"></p>
         <script src="./model/Hand.js"></script>
         <script src="./model/Card.js"></script>
         <script src="./model/Deck.js"></script>
