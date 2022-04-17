@@ -16,7 +16,6 @@ class Deck {
         this.createDeck();
         this.shuffle(); // shuffles 10x by default
         this.usedCards = [];
-        console.log(this.deck);
     }
 
     generateCardValue(value = 0) {
