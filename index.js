@@ -1,71 +1,135 @@
-const deck = [];
-const suites = {};
+let deck = null;
+let playerTurn = false;
+const dealerThreshold = 15;
+const dealerGreed = 0.666;
+let dealerGreedChance = Math.random();
 
-function createSuites() {
-    let suiteList = ["Heart", "Diamond", "Clover", "Spade"];
+// represent hands
+let user = null;
+let dealer = null;
 
-    for (let i = 0; i < 4; i++) {
-        suites[i] = suiteList[i];
-    }
-}
+// dom elements
+const playerText = document.querySelector("#player-score");
+const dealerText = document.querySelector("#dealer-score");
+const hitButton = document.querySelector("#hit");
+const stayButton = document.querySelector("#stay");
+const winnerText = document.querySelector("#winner");
 
-function generateCardValue(value = 0) {
-    const cardValue = ["A", "J", "Q", "K"];
-    if (value < 1 || value > 9) {
-        // 10, 11, 12 => 1, 2, 3
-        if (value > 9) {
-            return cardValue[value - 9];
-        }
-
-        return cardValue[value];
-    }
-    return value;
-}
-
-function createDeck() {
-    for (let i = 0; i < 13; i++) {
-        for (let j = 0; j < 4; j++) {
-            const card = generateCardValue(i);
-            deck[i * 4 + j] = {
-                card,
-                suite: suites[j],
-            };
+function deal() {
+    for (let cardCount = 0; cardCount < 4; cardCount++) {
+        card = deck.getCard();
+        if (cardCount % 2 == 0) {
+            user.add(card);
+        } else {
+            dealer.add(card);
         }
     }
 }
 
-function shuffle(deck) {
-    let cardSwap = deck.length;
+function start() {
+    // make new deck of card, shuffled on creation 10x
+    playerTurn = true;
+    deck = new Deck();
 
-    while (cardSwap) {
-        index = Math.floor(Math.random() * cardSwap--);
+    user = new Hand();
+    dealer = new Hand();
 
-        // swap last element with chosen index
-        tempCard = deck[cardSwap];
-        deck[cardSwap] = deck[index];
-        deck[index] = tempCard;
+    deal();
+
+    playerText.textContent = generatePlayerHand(user, "Player");
+    // `Player: ${user.hand[0].card} ${user.hand[1].card} = ${user.value}`;
+
+    // only reveal first card of dealer
+    dealerText.textContent = `Dealer: ${dealer.hand[0].card} ? = ?`;
+
+    hitButton.className = "";
+    stayButton.className = "";
+    winnerText.textContent = "";
+}
+
+function generatePlayerHand({ hand, value }, userType) {
+    // for each card in user's hand, get value and add it up
+    let text = hand.reduce((prev, next) => {
+        return prev + ` ${next.card} `;
+    }, `${userType}: `);
+
+    text += `= ${value}`;
+    return text;
+}
+
+function hit() {
+    if (playerTurn) {
+        getCard(user);
+
+        playerText.textContent = generatePlayerHand(user, "Player");
+
+        if (user.length > 4 || user.value > 21) {
+            playerTurn = false;
+
+            // computer turn
+            // reveal dealer cards
+            finishGame();
+        }
     }
 }
 
-function getCardValue({ card }) {
-    /*
-     * Card is an object, values 1 - 9 are numbers, AJQK are strings
-     * {
-     *  card: A, 1, ... J, Q, K
-     * }
-     */
+function stay() {
+    playerTurn = false;
+    finishGame();
+}
 
-    if (typeof card === "number") {
-        return card;
+function finishGame() {
+    dealerText.textContent = generatePlayerHand(dealer, "Dealer");
+    if (user.value > 21) {
+        winnerText.textContent = "Dealer Won!";
+        return;
     }
 
-    // if A => Ace => 10 like other strings
-    return 10;
-}
-function setUp() {
-    createSuites();
-    createDeck();
+    if (user.value < 22) {
+        // dealer will randomly decide if he wants to continue adding a card after a fixed score
+        while (dealer.value < dealerThreshold && dealer.length < 5 && dealer.value < 21) {
+            // draw a card
+            getCard(dealer);
+            dealerText.textContent = generatePlayerHand(dealer, "Dealer");
+        }
+
+        // getting out of loop means we either hit above 17 or we hit 5 cards
+
+        // if dealer didn't, generate random chance greater than dealer greed to stop
+
+        while (dealerGreedChance < dealerGreed && dealer.length < 5 && dealer.value < 21) {
+            getCard(dealer);
+            dealerText.textContent = generatePlayerHand(dealer, "Dealer");
+        }
+
+        // if dealer hit 5 cards, determine who won
+
+        console.log(`Scores: ${user.value}, ${dealer.value}`);
+
+        const userScore = user.value;
+        const dealerScore = dealer.value;
+        if (dealerScore > 21) {
+            winnerText.textContent = "You Won!";
+            return;
+        }
+
+        if (userScore < dealerScore) {
+            winnerText.textContent = "Dealer Won!";
+            return;
+        }
+
+        if (userScore > dealerScore) {
+            winnerText.textContent = "You Won!";
+            return;
+        } else {
+            winnerText.textContent = "You both Tied!";
+        }
+    } else {
+        winnerText.textContent = "Dealer Won!";
+    }
 }
 
-setUp();
-console.log(deck);
+function getCard(player) {
+    const card = deck.getCard();
+    player.add(card);
+}
