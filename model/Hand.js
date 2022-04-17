@@ -4,26 +4,31 @@ class Hand {
         this.length = 0;
         this.hasAce = false;
         this.value = 0;
-        this.aceValue = 1;
+        this.aceValue = 11;
+        this.aceCount = 0;
     }
 
     add(card) {
-        const cardValue = card.getCardValue();
-
         this.hand.push(card);
         this.length++;
-        this.value += cardValue;
+        this.aceCount = 0;
 
-        // check if card is an Ace
-        if (card.card === "A") {
-            this.hasAce;
+        this.value = this.hand.reduce((prev, nextCard) => {
+            if (nextCard.card === "A") {
+                this.aceCount++;
+                this.hasAce = true;
+            }
+            return prev + nextCard.value;
+        }, 0);
 
-            this.value -= cardValue;
-            this.value += this.aceValue;
+        if (this.hasAce) {
+            this.value -= this.aceCount * 1;
+            this.updateAceValue();
+            this.value += this.aceValue * this.aceCount;
         }
     }
 
-    getAceValue() {
+    updateAceValue() {
         if (this.value > 10) {
             this.aceValue = 1;
         } else {
